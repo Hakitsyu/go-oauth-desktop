@@ -14,11 +14,17 @@ import (
 	"time"
 )
 
+const OAUTH_TOKEN_URL string = "https://oauth2.googleapis.com/token"
+const OAUTH_AUTH_URL string = "https://accounts.google.com/o/oauth2/v2/auth"
+
 func main() {
 	const clientId string = ""
 	const clientSecret string = ""
 
-	scopes := []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"}
+	scopes := []string{
+		"https://www.googleapis.com/auth/userinfo.email",
+		"https://www.googleapis.com/auth/userinfo.profile",
+	}
 
 	startOAuthCodeFlow(clientId, clientSecret, scopes)
 }
@@ -84,9 +90,7 @@ type OAuthAuthorizationParams struct {
 }
 
 func generateOAuthAuthorizationUrl(params OAuthAuthorizationParams) string {
-	const baseUrl string = "https://accounts.google.com/o/oauth2/v2/auth"
-
-	u, err := url.Parse(baseUrl)
+	u, err := url.Parse(OAUTH_AUTH_URL)
 	if err != nil {
 		panic(err)
 	}
@@ -120,8 +124,6 @@ type OAuthTokenParams struct {
 }
 
 func getOAuthAccessToken(params OAuthTokenParams) string {
-	const baseUrl string = "https://oauth2.googleapis.com/token"
-
 	client := &http.Client{
 		Timeout: time.Minute,
 	}
@@ -135,7 +137,7 @@ func getOAuthAccessToken(params OAuthTokenParams) string {
 	data.Set("redirect_uri", params.RedirectUri)
 	encodedData := data.Encode()
 
-	req, err := http.NewRequest("POST", baseUrl, strings.NewReader(encodedData))
+	req, err := http.NewRequest("POST", OAUTH_TOKEN_URL, strings.NewReader(encodedData))
 	if err != nil {
 		panic(err)
 	}
